@@ -1,42 +1,55 @@
-﻿using Chess;
-using System.Drawing;
+﻿using Rudzoft.ChessLib;
+using Rudzoft.ChessLib.Factories;
+using Rudzoft.ChessLib.MoveGeneration;
+using Rudzoft.ChessLib.Types;
 
 namespace ChessEngine.Core
 {
     public class MinimaxEngine
     {
-        private readonly ChessBoard _board;
+        private readonly IGame _game;
+        private static int _moveCount = 0;
 
         public MinimaxEngine()
         {
-            _board = new();
+            _game = GameFactory.Create("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         }
 
-        public Move CalculateMove(Move opponentMove)
+        public Move CalculateNextMove(int depth, Move? opponentMove = null)
         {
-            _board.Move(opponentMove);
-            var possibleMoves = _board.Moves();
-            bool maximumPlayer = _board.Turn == PieceColor.White;
-            Dictionary<Move, double> moveEvals = new Dictionary<Move, double>();
+            if (opponentMove.HasValue)
+            {
+                _game.Pos.MakeMove(opponentMove.Value, new State());
+            }
+
+            _moveCount = 0;
+            var possibleMoves = _game.Pos.GenerateMoves();
+            bool maximumPlayer = _game.CurrentPlayer() == Player.White;
+            var moveEvals = new Dictionary<Move, double>();
 
             foreach (Move move in possibleMoves)
             {
-                double val = PerformMinimax(move, 5, double.NegativeInfinity, double.PositiveInfinity, maximumPlayer);
+                double val = PerformMinimax(move, depth - 1, double.NegativeInfinity, double.PositiveInfinity, maximumPlayer);
                 moveEvals[move] = val;
             }
 
-            Move bestMove = moveEvals.OrderBy(x => x.Value).First().Key;
+            var bestMove = moveEvals.OrderBy(x => x.Value).First().Key;
+            Console.WriteLine("MoveCount: {0}", _moveCount);
             return bestMove;
         }
 
         private double PerformMinimax(Move evaluationMove, int depth, double alpha, double beta, bool isMaximizingPlayer)
         {
-            _board.Move(evaluationMove);
-            var possibleMoves = _board.Moves();
-            if(depth == 0 || _board.IsEndGame)
+            _game.Pos.MakeMove(evaluationMove, new State());
+            _moveCount++;
+
+            var possibleMoves = _game.Pos.GenerateMoves();
+
+            if (depth == 0 || _game.Pos.IsMate)
             {
                 var value = EvaluateBoardPositions();
-                _board.Cancel();
+                _game.Pos.TakeMove(evaluationMove);
+
                 return value;
             }
 
@@ -46,6 +59,7 @@ namespace ChessEngine.Core
                 foreach (var move in possibleMoves)
                 {
                     double eval = PerformMinimax(move, depth - 1, alpha, beta, false);
+
                     maxEval = Math.Max(maxEval, eval);
                     alpha = Math.Max(alpha, eval);
                     if (beta <= alpha)
@@ -53,7 +67,7 @@ namespace ChessEngine.Core
                         break;
                     }
                 }
-                _board.Cancel();
+                _game.Pos.TakeMove(evaluationMove);
                 return maxEval;
             }
             else
@@ -62,6 +76,7 @@ namespace ChessEngine.Core
                 foreach (var move in possibleMoves)
                 {
                     double eval = PerformMinimax(move, depth - 1, alpha, beta, true);
+
                     minEval = Math.Min(minEval, eval);
                     beta = Math.Min(beta, eval);
                     if (beta <= alpha)
@@ -69,7 +84,7 @@ namespace ChessEngine.Core
                         break;
                     }
                 }
-                _board.Cancel();
+                _game.Pos.TakeMove(evaluationMove);
                 return minEval;
             }
 
@@ -83,12 +98,14 @@ namespace ChessEngine.Core
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var piece = _board[i, j];
-                    if(piece != null)
+                    var piece = _game.Pos.GetPiece(new Square(i, j));
+                    var type = piece.Type();
+                    var color = piece.ColorOf();
+                    if (type != PieceTypes.NoPieceType)
                     {
-                        var positionWeights = EvaluationConstants.PositionWeights[piece.Type][piece.Color];
+                        var positionWeights = EvaluationConstants.PositionWeights[type][color];
                         score += positionWeights[i, j];
-                        score += EvaluationConstants.PieceValue[piece.Type] * (piece.Color == PieceColor.Black ? -1 : 1);
+                        score += EvaluationConstants.PieceValue[type] * (color == Player.Black ? -1 : 1);
                     }
                 }
             }

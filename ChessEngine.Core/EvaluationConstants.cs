@@ -1,25 +1,20 @@
-﻿using Chess;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Rudzoft.ChessLib.Types;
 
 namespace ChessEngine.Core
 {
     internal static class EvaluationConstants
     {
-        public static Dictionary<PieceType, int> PieceValue { get; } = new()
+        public static Dictionary<PieceTypes, int> PieceValue { get; } = new()
         {
-            { PieceType.Pawn, 10 },
-            { PieceType.Knight, 30 },
-            { PieceType.Bishop, 30 },
-            { PieceType.Rook, 50 },
-            { PieceType.Queen, 90 },
-            { PieceType.King, 900 }
+            { PieceTypes.Pawn, 10 },
+            { PieceTypes.Knight, 30 },
+            { PieceTypes.Bishop, 30 },
+            { PieceTypes.Rook, 50 },
+            { PieceTypes.Queen, 90 },
+            { PieceTypes.King, 900 }
         };
 
-        public static double[,] PawnPositionWeightsWhite { get; } = new double[,]
+        public static double[,] PawnPositionWeightsWhite { get; } =
         {
             { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
             { 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0 },
@@ -31,7 +26,7 @@ namespace ChessEngine.Core
             { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }
         };
 
-        public static double[,] KnightPositionWeights { get; } = new double[,]
+        public static double[,] KnightPositionWeights { get; } =
         {
             { -5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0 },
             { -4.0, -2.0, 0.0, 0.0, 0.0, 0.0, -2.0, -4.0 },
@@ -43,7 +38,7 @@ namespace ChessEngine.Core
             { -5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0 }
         };
 
-        public static double[,] BishopPositionWeightsWhite { get; } = new double[,]
+        public static double[,] BishopPositionWeightsWhite { get; } =
         {
             { -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0 },
             { -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0 },
@@ -55,7 +50,7 @@ namespace ChessEngine.Core
             { -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0 }
         };
 
-        public static double[,] RookPositionWeightsWhite { get; } = new double[,]
+        public static double[,] RookPositionWeightsWhite { get; } =
         {
             { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
             { 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5 },
@@ -67,7 +62,7 @@ namespace ChessEngine.Core
             { 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0 }
         };
 
-        public static double[,] QueenPositionWeights { get; } = new double[,]
+        public static double[,] QueenPositionWeights { get; } =
         {
             { -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0 },
             { -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0 },
@@ -79,7 +74,7 @@ namespace ChessEngine.Core
             { -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0 }
         };
 
-        public static double[,] KingPositionWeightsWhite { get; } = new double[,]
+        public static double[,] KingPositionWeightsWhite { get; } =
         {
             { -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0 },
             { -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0 },
@@ -96,57 +91,64 @@ namespace ChessEngine.Core
         public static double[,] RookPositionWeightsBlack { get; } = ReverseArray(RookPositionWeightsWhite);
         public static double[,] KingPositionWeightsBlack { get; } = ReverseArray(KingPositionWeightsWhite);
 
-        public static Dictionary<PieceType, Dictionary<PieceColor, double[,]>> PositionWeights { get; } = new() 
+        public static Dictionary<PieceTypes, Dictionary<Player, double[,]>> PositionWeights { get; } = new() 
         { 
-            { 
-                PieceType.Pawn, new() 
+            {
+                PieceTypes.Pawn, new() 
                 { 
-                    { PieceColor.White, PawnPositionWeightsWhite }, 
-                    { PieceColor.Black, PawnPositionWeightsBlack } 
+                    { Player.White, PawnPositionWeightsWhite }, 
+                    { Player.Black, PawnPositionWeightsBlack } 
                 } 
             }, 
-            { 
-                PieceType.Rook, new() 
+            {
+                PieceTypes.Rook, new() 
                 { 
-                    { PieceColor.White, RookPositionWeightsWhite }, 
-                    { PieceColor.Black, RookPositionWeightsBlack } 
+                    { Player.White, RookPositionWeightsWhite }, 
+                    { Player.Black, RookPositionWeightsBlack } 
                 }
             },
             {
-                PieceType.Knight, new()
+                PieceTypes.Knight, new()
                 {
-                    { PieceColor.White, KnightPositionWeights },
-                    { PieceColor.Black, KnightPositionWeights }
+                    { Player.White, KnightPositionWeights },
+                    { Player.Black, KnightPositionWeights }
                 }
             },
             {
-                PieceType.Bishop, new()
+                PieceTypes.Bishop, new()
                 {
-                    { PieceColor.White, BishopPositionWeightsWhite },
-                    { PieceColor.Black, BishopPositionWeightsBlack }
+                    { Player.White, BishopPositionWeightsWhite },
+                    { Player.Black, BishopPositionWeightsBlack }
                 }
             },
             {
-                PieceType.Queen, new()
+                PieceTypes.Queen, new()
                 {
-                    { PieceColor.White, QueenPositionWeights },
-                    { PieceColor.Black, QueenPositionWeights }
+                    { Player.White, QueenPositionWeights },
+                    { Player.Black, QueenPositionWeights }
                 }
             },
             {
-                PieceType.King, new()
+                PieceTypes.King, new()
                 {
-                    { PieceColor.White, KingPositionWeightsWhite },
-                    { PieceColor.Black, KingPositionWeightsBlack }
+                    { Player.White, KingPositionWeightsWhite },
+                    { Player.Black, KingPositionWeightsBlack }
                 }
             },
         };
 
         private static double[,] ReverseArray(double[,] array)
         {
-            var outputArray = new double[8, 8]; 
-            array.CopyTo(outputArray, 0);
-            Array.Reverse(outputArray);
+            var outputArray = array.Clone() as double[,];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    var temp = outputArray![i, j];
+                    outputArray[i, j] = outputArray[outputArray.Length / 8 - i - 1, j];
+                    outputArray[outputArray.Length / 8 - i - 1, j] = temp;
+                }
+            }
             return outputArray;
         }
     }
