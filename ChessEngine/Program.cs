@@ -1,8 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using ChessEngine.Core;
+﻿using ChessEngine.Uci;
 
-Console.WriteLine("Hello, World!");
-var engine = new MinimaxEngine();
-
-var move = engine.CalculateNextMove(6);
-Console.WriteLine(move.ToString());
+var game = new UciGame();
+game.StartGame();

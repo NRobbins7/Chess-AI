@@ -1,26 +1,49 @@
-﻿using Rudzoft.ChessLib;
+﻿using ChessEngine.Core.Abstractions;
+using Rudzoft.ChessLib;
 using Rudzoft.ChessLib.Factories;
 using Rudzoft.ChessLib.MoveGeneration;
 using Rudzoft.ChessLib.Types;
 
 namespace ChessEngine.Core
 {
-    public class MinimaxEngine
+    public class MinimaxEngine : IChessEngine
     {
         private readonly IGame _game;
 
-        public MinimaxEngine()
+        public MinimaxEngine(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", IEnumerable<string> strMoves = null)
         {
-            _game = GameFactory.Create("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            _game = GameFactory.Create(fen);
+
+            if (strMoves != null)
+            {
+                var moves = strMoves.Select(strMove =>
+                {
+                    var fromSquare = new Square(Enum.Parse<Squares>(strMove.Substring(0, 2)));
+                    var toSquare = new Square(Enum.Parse<Squares>(strMove.Substring(2, 2)));
+                    return new Move(fromSquare, toSquare);
+                });
+
+                foreach (var move in moves)
+                {
+                    _game.Pos.MakeMove(move, new State());
+                }
+            }
         }
 
-        public Move CalculateNextMove(int depth, Move? opponentMove = null)
+        public MinimaxEngine(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", IEnumerable<Move> moves = null)
         {
-            if (opponentMove.HasValue)
+            _game = GameFactory.Create(fen);
+            if (moves != null)
             {
-                _game.Pos.MakeMove(opponentMove.Value, new State());
+                foreach (var move in moves)
+                {
+                    _game.Pos.MakeMove(move, new State());
+                }
             }
+        }
 
+        public Move CalculateNextMove(int depth)
+        {
             var possibleMoves = _game.Pos.GenerateMoves();
             bool maximumPlayer = _game.CurrentPlayer() == Player.White;
             var moveEvals = new Dictionary<Move, double>();
