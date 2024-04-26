@@ -8,7 +8,6 @@ namespace ChessEngine.Core
     public class MinimaxEngine
     {
         private readonly IGame _game;
-        private static int _moveCount = 0;
 
         public MinimaxEngine()
         {
@@ -22,7 +21,6 @@ namespace ChessEngine.Core
                 _game.Pos.MakeMove(opponentMove.Value, new State());
             }
 
-            _moveCount = 0;
             var possibleMoves = _game.Pos.GenerateMoves();
             bool maximumPlayer = _game.CurrentPlayer() == Player.White;
             var moveEvals = new Dictionary<Move, double>();
@@ -34,17 +32,12 @@ namespace ChessEngine.Core
             }
 
             var bestMove = moveEvals.OrderBy(x => x.Value).First().Key;
-            Console.WriteLine("MoveCount: {0}", _moveCount);
             return bestMove;
         }
 
         private double PerformMinimax(Move evaluationMove, int depth, double alpha, double beta, bool isMaximizingPlayer)
         {
             _game.Pos.MakeMove(evaluationMove, new State());
-            _moveCount++;
-
-            var possibleMoves = _game.Pos.GenerateMoves();
-
             if (depth == 0 || _game.Pos.IsMate)
             {
                 var value = EvaluateBoardPositions();
@@ -53,42 +46,41 @@ namespace ChessEngine.Core
                 return value;
             }
 
+            var possibleMoves = _game.Pos.GenerateMoves();
+            double score;
+
             if (isMaximizingPlayer)
             {
-                double maxEval = double.NegativeInfinity;
+                score = double.NegativeInfinity;
                 foreach (var move in possibleMoves)
                 {
-                    double eval = PerformMinimax(move, depth - 1, alpha, beta, false);
+                    double eval = PerformMinimax(move, depth - 1, alpha, beta, !isMaximizingPlayer);
 
-                    maxEval = Math.Max(maxEval, eval);
+                    score = Math.Max(score, eval);
                     alpha = Math.Max(alpha, eval);
                     if (beta <= alpha)
                     {
                         break;
                     }
                 }
-                _game.Pos.TakeMove(evaluationMove);
-                return maxEval;
             }
             else
             {
-                double minEval = double.PositiveInfinity;
+                score = double.PositiveInfinity;
                 foreach (var move in possibleMoves)
                 {
-                    double eval = PerformMinimax(move, depth - 1, alpha, beta, true);
-
-                    minEval = Math.Min(minEval, eval);
+                    double eval = PerformMinimax(move, depth - 1, alpha, beta, !isMaximizingPlayer);
+                    score = Math.Min(score, eval);
                     beta = Math.Min(beta, eval);
                     if (beta <= alpha)
                     {
                         break;
                     }
                 }
-                _game.Pos.TakeMove(evaluationMove);
-                return minEval;
             }
 
-
+            _game.Pos.TakeMove(evaluationMove);
+            return score;
         }
 
         private double EvaluateBoardPositions()
