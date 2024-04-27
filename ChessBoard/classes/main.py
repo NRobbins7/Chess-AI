@@ -130,7 +130,7 @@ while running == True:
         chessEngine = pexpect.popen_spawn.PopenSpawn(enginePath)
     else:
         chessEngine = pexpect.spawn(enginePath)
-    chessEngine.sendline(input='uci')
+    chessEngine.sendline('uci')
 
     while onGameAI == True:
         gameWindow.fill('gray')
@@ -198,8 +198,9 @@ while running == True:
                     input += " moves " + movesString
                 chessEngine.sendline(input)
                 chessEngine.sendline("go")
-                aiMove = chessEngine.expect("bestmove ")
+                chessEngine.expect("[a-h][1-8][a-h][1-8]")
+                aiMove = chessEngine.after.decode("UTF-8")
 
                 gameBoard.boardPos.push_uci(aiMove)
-                gameBoard.changeTurn()
+                gameBoard.changeTurn(True)
             pygame.display.flip()
