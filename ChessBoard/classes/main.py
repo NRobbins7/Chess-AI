@@ -1,5 +1,13 @@
+import pexpect.popen_spawn
 import pygame
 import chess
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
+import sys
+import os
+import pexpect
+from pexpect import popen_spawn
+
 
 from newBoard import board
 from menu import menu
@@ -113,6 +121,16 @@ while running == True:
                     
 
             pygame.display.flip()
+    
+    
+    enginePath = os.path.join(sys.path[0], '../../ChessEngine/ChessEngine/bin/Debug/net6.0/ChessEngine.exe')
+    enginePath = os.path.normpath(enginePath)
+    if os.name == "nt":      
+        print(enginePath)
+        chessEngine = pexpect.popen_spawn.PopenSpawn(enginePath)
+    else:
+        chessEngine = pexpect.spawn(enginePath)
+    chessEngine.sendline(input='uci')
 
     while onGameAI == True:
         gameWindow.fill('gray')
@@ -171,5 +189,17 @@ while running == True:
                         start = None
                         end = None
                 gameBoard.drawBoard()
-        
+            if playerColor != gameBoard.turn:
+                input='position startpos'
+                moves = gameBoard.boardPos.move_stack
+
+                if len(moves) > 0:
+                    movesString = " ".join((move.uci()) for move in moves)
+                    input += " moves " + movesString
+                chessEngine.sendline(input)
+                chessEngine.sendline("go")
+                aiMove = chessEngine.expect("bestmove ")
+
+                gameBoard.boardPos.push_uci(aiMove)
+                gameBoard.changeTurn()
             pygame.display.flip()
