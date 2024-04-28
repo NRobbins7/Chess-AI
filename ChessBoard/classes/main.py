@@ -53,6 +53,16 @@ def drawAiBoard(gameWindow, gameBoard):
 
     startMenu.backgroundDraw.draw(gameWindow)
     gameBoard.drawBoardWindow(gameWindow, None)
+
+    if gameBoard.gameIsOver == True:
+        if pauseGame == False:
+            gameBoard.getEnding(gameWindow)
+        else:
+            if gameBoard.turn == 'white':
+                startMenu.gameEndBlack(gameWindow)
+            else:
+                startMenu.gameEndWhite(gameWindow)
+
     if onColorSelectMenu == True:
         startMenu.chooseColor(gameWindow)
     elif pauseGame == True:
@@ -149,6 +159,7 @@ while running == True:
         
         startMenu.backgroundDraw.draw(gameWindow)
         startMenu.draw_menu(gameWindow)
+        
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mousepos = pygame.mouse.get_pos()
@@ -182,9 +193,6 @@ while running == True:
                     elif startMenu.navyturquoiseButton.rect.collidepoint(mousepos):
                         gameBoard.color = 5
                         startMenu.isClicked = False
-                elif startMenu.help == True:
-                    if startMenu.toMenuButton.rect.collidepoint(mousepos):
-                        startMenu.help = False
             pygame.display.flip()
     
     gameBoard.drawBoard()

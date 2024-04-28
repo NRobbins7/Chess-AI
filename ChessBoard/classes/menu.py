@@ -27,9 +27,6 @@ class menu():
         self.helpImg = pygame.image.load("ChessBoard/help.png")
         self.helpButton = button((800 - self.helpImg.get_rect().width)/2, 450, self.helpImg)
 
-        self.helpWindowImg = pygame.image.load("ChessBoard/instructions.png")
-        self.helpWindow = button((800 - self.helpWindowImg.get_rect().width)/2, (600 - self.helpImg.get_rect().height)/2, self.helpWindowImg)
-
         self.whiteblackImg = pygame.image.load("ChessBoard/white.png")
         self.whiteblackButton = button(700, 70, self.whiteblackImg)
         self.redpinkImg = pygame.image.load("ChessBoard/pink.png")
@@ -71,7 +68,6 @@ class menu():
             self.startGameButton.draw(window)
             self.startAIButton.draw(window)
             self.colorMenuOpenButton.draw(window)
-            self.helpButton.draw(window)
         if self.isClicked == True:
             self.whiteblackButton.draw(window)
             self.redpinkButton.draw(window)
@@ -79,9 +75,6 @@ class menu():
             self.greenblueButton.draw(window)
             self.brownbeigeButton.draw(window)
             self.navyturquoiseButton.draw(window)
-        elif self.help == True:
-            self.helpWindow.draw(window)
-            self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 450, self.toMenuImg)
 
     def gameEndWhite(self, window):
         self.backgroundDraw.draw(window)
@@ -100,7 +93,7 @@ class menu():
     def gameEndDraw(self, window):
         self.backgroundDraw.draw(window)
         gameEndImg = pygame.image.load("ChessBoard/draw.png")
-        gameEnd = button(250, 125, gameEndImg)
+        gameEnd = button(220, 125, gameEndImg)
         gameEnd.draw(window)
         self.rematchButton.draw(window)
         self.toMenuButton.draw(window)
