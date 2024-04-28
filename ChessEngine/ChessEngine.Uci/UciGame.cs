@@ -28,7 +28,7 @@ namespace ChessEngine.Uci
                         SetupBoard(splitInput);
                         break;
                     case "go":
-                        if (_chessEngine != null) Console.WriteLine("bestmove {0}", _chessEngine.CalculateNextMove(7));
+                        if (_chessEngine != null) Console.WriteLine("bestmove {0}", _chessEngine.CalculateNextMove(5));
                         break;
                     case "quit":
                         stopEngine = false;

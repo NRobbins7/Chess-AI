@@ -1,3 +1,4 @@
+import asyncio
 import pexpect.popen_spawn
 import pygame
 import chess
@@ -25,11 +26,105 @@ onColorSelectMenu = False
 
 playerColor = 'white'
 
+engineBusy = False
+
 legalSquares = None
 activesquare = None
 start = None
 end = None
 startMenu = menu()
+
+def drawAiBoard(gameWindow, gameBoard):
+    # Define global variables
+    global onMenu
+    global onGamePVP
+    global onGameAI
+    global onColorSelectMenu
+    global playerColor
+    global engineBusy
+    global legalSquares
+    global activesquare
+    global start
+    global end
+    global startMenu
+
+    gameWindow.fill('gray')
+    gameBoard.drawBoardWindow(gameWindow, None)
+    if onColorSelectMenu == True:
+        startMenu.chooseColor(gameWindow)
+    
+    
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if onColorSelectMenu == True:
+                if startMenu.chooseWhiteButton.rect.collidepoint(pygame.mouse.get_pos()):
+                    onColorSelectMenu = False
+                    playerColor = 'white'
+                elif startMenu.chooseBlackButton.rect.collidepoint(pygame.mouse.get_pos()):
+                    onColorSelectMenu = False
+                    playerColor = 'black'
+                    gameBoard.flipped = True
+            else:
+                if gameBoard.gameIsOver == False:
+                    if playerColor == gameBoard.turn:
+                        mousepos = pygame.mouse.get_pos()
+                        for squares in gameBoard.grid:
+                            if(squares.drawRect.collidepoint(mousepos)):
+                                if(squares.pieceOn != None) and (squares.pieceOn.color == gameBoard.turn):
+                                    start = squares.getUCI(gameBoard.turn)
+                                    activesquare = squares
+                                    activesquare.active = True
+                else:
+                    if startMenu.rematchButton.rect.collidepoint(pygame.mouse.get_pos()):
+                        start = None
+                        end = None
+                        gameBoard.newGame()
+                    elif startMenu.toMenuButton.rect.collidepoint(pygame.mouse.get_pos()):
+                        onMenu = True
+                        onGamePVP = False
+                        onGameAI = False
+                        startMenu.isClicked = False
+        if event.type == pygame.MOUSEMOTION:
+            if activesquare != None:
+                gameBoard.drawBoardWindow(gameWindow, gameBoard.getLegalSquares(activesquare.num, gameBoard.flipped))
+                activesquare.active = True
+                mos = pygame.mouse.get_pos()
+                xpos = mos[0] - (511/8)/2
+                ypos = mos[1] - (511/8)/2
+                gameWindow.blit(activesquare.pieceOn.img, (xpos, ypos))
+        if event.type == pygame.MOUSEBUTTONUP:
+            activesquare = None 
+            if start != None:
+                for squares in gameBoard.grid:
+                    if(squares.drawRect.collidepoint(pygame.mouse.get_pos())):
+                        end = squares.getUCI(gameBoard.turn)
+                        move =  start + end
+                if start != None and end != None and start != end:
+                    gameBoard.makeMove(move, gameWindow, True)
+                    start = None
+                    end = None
+            gameBoard.drawBoard()
+        if playerColor != gameBoard.turn and engineBusy == False:
+            input='position startpos'
+            moves = gameBoard.boardPos.move_stack
+
+            if len(moves) > 0:
+                movesString = " ".join((move.uci()) for move in moves)
+                input += " moves " + movesString
+            chessEngine.sendline(input)
+            chessEngine.sendline("go")
+            engineBusy = True
+            for i in range(100):
+                print(i)
+                drawAiBoard(gameWindow, gameBoard)
+            chessEngine.expect("[a-h][1-8][a-h][1-8]")
+            engineBusy = False
+            aiMove = chessEngine.after.decode("UTF-8")
+
+            gameBoard.boardPos.push_uci(aiMove)
+            gameBoard.changeTurn(True)
+            gameBoard.drawBoard()
+        pygame.display.flip()
 
 while running == True:
     gameBoard = board()
@@ -133,74 +228,4 @@ while running == True:
     chessEngine.sendline('uci')
 
     while onGameAI == True:
-        gameWindow.fill('gray')
-        gameBoard.drawBoardWindow(gameWindow, None)
-        if onColorSelectMenu == True:
-            startMenu.chooseColor(gameWindow)
-        
-        
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if onColorSelectMenu == True:
-                    if startMenu.chooseWhiteButton.rect.collidepoint(pygame.mouse.get_pos()):
-                        onColorSelectMenu = False
-                        playerColor = 'white'
-                    elif startMenu.chooseBlackButton.rect.collidepoint(pygame.mouse.get_pos()):
-                        onColorSelectMenu = False
-                        playerColor = 'black'
-                        gameBoard.flipped = True
-                else:
-                    if gameBoard.gameIsOver == False:
-                        if playerColor == gameBoard.turn:
-                            mousepos = pygame.mouse.get_pos()
-                            for squares in gameBoard.grid:
-                                if(squares.drawRect.collidepoint(mousepos)):
-                                    if(squares.pieceOn != None) and (squares.pieceOn.color == gameBoard.turn):
-                                        start = squares.getUCI(gameBoard.turn)
-                                        activesquare = squares
-                                        activesquare.active = True
-                    else:
-                        if startMenu.rematchButton.rect.collidepoint(pygame.mouse.get_pos()):
-                            start = None
-                            end = None
-                            gameBoard.newGame()
-                        elif startMenu.toMenuButton.rect.collidepoint(pygame.mouse.get_pos()):
-                            onMenu = True
-                            onGamePVP = False
-                            onGameAI = False
-                            startMenu.isClicked = False
-            if event.type == pygame.MOUSEMOTION:
-                if activesquare != None:
-                    gameBoard.drawBoardWindow(gameWindow, gameBoard.getLegalSquares(activesquare.num, gameBoard.flipped))
-                    activesquare.active = True
-                    mos = pygame.mouse.get_pos()
-                    xpos = mos[0] - (511/8)/2
-                    ypos = mos[1] - (511/8)/2
-                    gameWindow.blit(activesquare.pieceOn.img, (xpos, ypos))
-            if event.type == pygame.MOUSEBUTTONUP:
-                activesquare = None 
-                if start != None:
-                    for squares in gameBoard.grid:
-                        if(squares.drawRect.collidepoint(pygame.mouse.get_pos())):
-                            end = squares.getUCI(gameBoard.turn)
-                            move =  start + end
-                    if start != None and end != None and start != end:
-                        gameBoard.makeMove(move, gameWindow, True)
-                        start = None
-                        end = None
-                gameBoard.drawBoard()
-            if playerColor != gameBoard.turn:
-                input='position startpos'
-                moves = gameBoard.boardPos.move_stack
-
-                if len(moves) > 0:
-                    movesString = " ".join((move.uci()) for move in moves)
-                    input += " moves " + movesString
-                chessEngine.sendline(input)
-                chessEngine.sendline("go")
-                chessEngine.expect("[a-h][1-8][a-h][1-8]")
-                aiMove = chessEngine.after.decode("UTF-8")
-
-                gameBoard.boardPos.push_uci(aiMove)
-                gameBoard.changeTurn(True)
-            pygame.display.flip()
+        drawAiBoard(gameWindow, gameBoard)
