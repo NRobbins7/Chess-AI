@@ -6,6 +6,9 @@ class menu():
         self.backgroundImg = pygame.transform.scale(pygame.image.load("ChessBoard/background.png"), (800,600))
         self.backgroundDraw = button(0, 0, self.backgroundImg)
         #main menu buttons
+        self.titleImg = pygame.image.load("ChessBoard/title.png")
+        self.title = button((800 - self.titleImg.get_rect().width)/2, 50, self.titleImg)
+
         self.startGameButtonImg = pygame.image.load("ChessBoard/startLocal.png")
         self.startGameButtonImg = pygame.transform.scale_by(self.startGameButtonImg, 1)
         self.startGameButton = button((800 - self.startGameButtonImg.get_rect().width)/2, 200, self.startGameButtonImg)
@@ -20,6 +23,13 @@ class menu():
         self.colorMenuImg = pygame.transform.scale(pygame.image.load("ChessBoard/colorMenu.png"), (200,250))
         self.colorMenuButton = button(580, 50, self.colorMenuImg)
 
+        self.help = False
+        self.helpImg = pygame.image.load("ChessBoard/help.png")
+        self.helpButton = button((800 - self.helpImg.get_rect().width)/2, 450, self.helpImg)
+
+        self.helpWindowImg = pygame.image.load("ChessBoard/instructions.png")
+        self.helpWindow = button((800 - self.helpWindowImg.get_rect().width)/2, (600 - self.helpImg.get_rect().height)/2, self.helpWindowImg)
+
         self.whiteblackImg = pygame.image.load("ChessBoard/white.png")
         self.whiteblackButton = button(700, 70, self.whiteblackImg)
         self.redpinkImg = pygame.image.load("ChessBoard/pink.png")
@@ -33,24 +43,35 @@ class menu():
         self.navyturquoiseImg = pygame.image.load("ChessBoard/navy.png")
         self.navyturquoiseButton = button(740, 150, self.navyturquoiseImg)
         #game end menu buttons
+        self.resumeButtonImg = pygame.image.load("ChessBoard/resume.png")
+        self.resumeButton = button((800 - self.resumeButtonImg.get_rect().width)/2, 275, self.resumeButtonImg)
+        self.forfeitButtonImg = pygame.image.load("ChessBoard/forfeit.png")
+        self.forfeitButton = button((800 - self.forfeitButtonImg.get_rect().width)/2, 400, self.forfeitButtonImg)
+
         self.rematchImg = pygame.image.load("ChessBoard/rematch.png")
         self.rematchButton = button((800 - self.rematchImg.get_rect().width)/2, 270, self.rematchImg)
 
         self.toMenuImg = pygame.image.load("ChessBoard/toMenu.png")
-        self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 350, self.toMenuImg)
+        self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 400, self.toMenuImg)
 
         #AI color select menu buttons
         self.colorSelectMenuImg = pygame.transform.scale(pygame.image.load("ChessBoard/chooseColorMenu.png"), (400, 350))
         self.colorSelectMenu = button(200, 125, self.colorSelectMenuImg)
 
-        self.chooseWhiteImg = pygame.transform.scale(pygame.image.load("ChessBoard/chooseWhite.png"), (100,100))
+        self.chooseMenuImg = pygame.image.load("ChessBoard/choose.png")
+        self.chooseMenu = button((800 - self.chooseMenuImg.get_rect().width)/2, 50, self.chooseMenuImg)
+        self.chooseWhiteImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/white-pawn.png"), 3)
         self.chooseWhiteButton = button(255, 340, self.chooseWhiteImg)
-        self.chooseBlackImg = pygame.transform.scale(pygame.image.load("ChessBoard/chooseBlack.png"), (100,100))
+        self.chooseBlackImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/black-pawn.png"), 3)
         self.chooseBlackButton = button(450, 340, self.chooseBlackImg)
     def draw_menu(self, window):
-        self.startGameButton.draw(window)
-        self.startAIButton.draw(window)
-        self.colorMenuOpenButton.draw(window)
+        if self.help == False:
+            self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 400, self.toMenuImg)
+            self.title.draw(window)
+            self.startGameButton.draw(window)
+            self.startAIButton.draw(window)
+            self.colorMenuOpenButton.draw(window)
+            self.helpButton.draw(window)
         if self.isClicked == True:
             self.whiteblackButton.draw(window)
             self.redpinkButton.draw(window)
@@ -58,28 +79,35 @@ class menu():
             self.greenblueButton.draw(window)
             self.brownbeigeButton.draw(window)
             self.navyturquoiseButton.draw(window)
+        elif self.help == True:
+            self.helpWindow.draw(window)
+            self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 450, self.toMenuImg)
 
     def gameEndWhite(self, window):
-        gameEndImg = pygame.transform.scale(pygame.image.load("ChessBoard/gameEndWhite.png"), (300, 350))
+        self.backgroundDraw.draw(window)
+        gameEndImg = pygame.image.load("ChessBoard/whiteWins.png")
         gameEnd = button(250, 125, gameEndImg)
         gameEnd.draw(window)
         self.rematchButton.draw(window)
         self.toMenuButton.draw(window)
     def gameEndBlack(self, window):
-        gameEndImg = pygame.transform.scale(pygame.image.load("ChessBoard/gameEndWhite.png"), (300, 350))
+        self.backgroundDraw.draw(window)
+        gameEndImg = pygame.image.load("ChessBoard/blackWins.png")
         gameEnd = button(250, 125, gameEndImg)
         gameEnd.draw(window)
         self.rematchButton.draw(window)
         self.toMenuButton.draw(window)
     def gameEndDraw(self, window):
-        gameEndImg = pygame.transform.scale(pygame.image.load("ChessBoard/gameEndWhite.png"), (300, 350))
+        self.backgroundDraw.draw(window)
+        gameEndImg = pygame.image.load("ChessBoard/draw.png")
         gameEnd = button(250, 125, gameEndImg)
         gameEnd.draw(window)
         self.rematchButton.draw(window)
         self.toMenuButton.draw(window)
 
     def chooseColor(self, window):
-        self.colorSelectMenu.draw(window)
+        self.backgroundDraw.draw(window)
+        self.chooseMenu.draw(window)
         self.chooseBlackButton.draw(window)
         self.chooseWhiteButton.draw(window)
     
@@ -90,3 +118,9 @@ class menu():
         else:
             
             self.isClicked = False
+
+    def pauseGame(self, window):
+        self.backgroundDraw.draw(window)
+        self.forfeitButton.draw(window)
+        self.resumeButton.draw(window)
+        
