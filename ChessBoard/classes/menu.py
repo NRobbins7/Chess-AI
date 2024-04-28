@@ -60,10 +60,10 @@ class menu():
 
         self.chooseMenuImg = pygame.image.load("ChessBoard/choose.png")
         self.chooseMenu = button((800 - self.chooseMenuImg.get_rect().width)/2, 50, self.chooseMenuImg)
-        self.chooseWhiteImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/white-pawn.png"), 3)
-        self.chooseWhiteButton = button(255, 340, self.chooseWhiteImg)
-        self.chooseBlackImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/black-pawn.png"), 3)
-        self.chooseBlackButton = button(450, 340, self.chooseBlackImg)
+        self.chooseWhiteImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/white-pawn.png"), 1.5)
+        self.chooseWhiteButton = button(220, 200, self.chooseWhiteImg)
+        self.chooseBlackImg = pygame.transform.scale_by(pygame.image.load("ChessBoard/choose-black-pawn.png"), 1.5)
+        self.chooseBlackButton = button(410, 200, self.chooseBlackImg)
     def draw_menu(self, window):
         if self.help == False:
             self.toMenuButton = button((800 - self.toMenuImg.get_rect().width)/2, 400, self.toMenuImg)

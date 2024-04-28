@@ -27,6 +27,7 @@ pauseGame = False
 
 playerColor = 'white'
 
+engineExists = False
 engineBusy = False
 
 legalSquares = None
@@ -48,6 +49,7 @@ def drawAiBoard(gameWindow, gameBoard):
     global start
     global end
     global startMenu
+    global pauseGame
 
     startMenu.backgroundDraw.draw(gameWindow)
     gameBoard.drawBoardWindow(gameWindow, None)
@@ -80,8 +82,10 @@ def drawAiBoard(gameWindow, gameBoard):
                         startMenu.isClicked = False        
             else:
                 if gameBoard.gameIsOver == False:
+                    mousepos = pygame.mouse.get_pos()
+                    if startMenu.colorMenuOpenButton.rect.collidepoint(mousepos):
+                        pauseGame = True
                     if playerColor == gameBoard.turn:
-                        mousepos = pygame.mouse.get_pos()
                         for squares in gameBoard.grid:
                             if(squares.drawRect.collidepoint(mousepos)):
                                 if(squares.pieceOn != None) and (squares.pieceOn.color == gameBoard.turn):
@@ -129,7 +133,6 @@ def drawAiBoard(gameWindow, gameBoard):
             chessEngine.sendline("go")
             engineBusy = True
             for i in range(100):
-                print(i)
                 drawAiBoard(gameWindow, gameBoard)
             chessEngine.expect("[a-h][1-8][a-h][1-8]")
             engineBusy = False
@@ -260,15 +263,15 @@ while running == True:
             pygame.display.flip()
     
     
-    if onGameAI == True:
+    if onGameAI and not engineExists:
         enginePath = os.path.join(sys.path[0], '../../ChessEngine/ChessEngine/bin/Debug/net6.0/ChessEngine.exe')
         enginePath = os.path.normpath(enginePath)
-        if os.name == "nt":      
-            print(enginePath)
+        if os.name == "nt":
             chessEngine = pexpect.popen_spawn.PopenSpawn(enginePath)
         else:
             chessEngine = pexpect.spawn(enginePath)
         chessEngine.sendline('uci')
+        engineExists = True
 
     while onGameAI == True:
         drawAiBoard(gameWindow, gameBoard)
