@@ -24,6 +24,7 @@ class board():
             self.boardPos.push_uci(move)
             if(self.boardPos.is_checkmate() == True) or (self.boardPos.is_stalemate() == True) or (self.boardPos.can_claim_draw() == True):
                 self.gameIsOver = True
+                print(True)
                 self.getEnding(window)
             else:
                 self.changeTurn(ai)
